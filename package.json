@@ -1,0 +1,10 @@
+{
+  "name": "housedata",
+  "version": "1.0.0",
+  "devDependencies": {
+    "@aws-sdk/client-cloudwatch": "^3.348.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.348.0"
+  }
+}
