@@ -2,18 +2,18 @@ import { CloudWatchClient, PutMetricDataCommand } from "@aws-sdk/client-cloudwat
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
 export const handler = async(event) => {
-    console.log("Event received: " + JSON.stringify(event));
-    const body = JSON.parse(event.body);
-    console.log("payload body: " + JSON.stringify(body));
+    console.log("Event recieved: " + JSON.stringify(event));
+    const eventBody = JSON.parse(event.body);
+    console.log("payload body: " + JSON.stringify(eventBody));
 
-    const date = new Date();
+    const date = new Date(eventBody.epochMillis);
 
-    await writeToCloudWatch(body, date);
-    await writeDataToDdb(body, date);
+    await writeToCloudWatch(eventBody, date);
+    await writeDataToDdb(eventBody, date);
 
     const responseToClient = {
         statusCode: 200,
-        body: JSON.stringify({ Message: 'Success' }),
+        eventBody: JSON.stringify({ Message: 'Success' }),
     };
     return responseToClient;
 };
