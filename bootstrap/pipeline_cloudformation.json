@@ -1,0 +1,111 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "CodePipeline": {
+      "Type": "AWS::CodePipeline::Pipeline",
+      "Properties": {
+        "Name": "HouseDataPipeline",
+        "RoleArn": "arn:aws:iam::601766089601:role/service-role/AWSCodePipelineServiceRole-us-west-2-t3",
+        "ArtifactStore": {
+          "Type": "S3",
+          "Location": "codepipeline-housedata-testing1"
+        },
+        "Stages": [
+          {
+            "Name": "Source",
+            "Actions": [
+              {
+                "Name": "Source",
+                "ActionTypeId": {
+                  "Category": "Source",
+                  "Owner": "AWS",
+                  "Provider": "CodeStarSourceConnection",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "ConnectionArn": "arn:aws:codestar-connections:us-east-1:601766089601:connection/3e4097e2-3d48-44f2-839b-10bc481c72e7",
+                  "FullRepositoryId": "frenjaso/housedata",
+                  "BranchName": "main"
+                },
+                "OutputArtifacts": [
+                  {
+                    "Name": "SourceArtifact"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "Name": "DeployCfn",
+            "Actions": [
+              {
+                "Name": "DeployCfn",
+                "ActionTypeId": {
+                  "Category": "Deploy",
+                  "Owner": "AWS",
+                  "Provider": "CloudFormation",
+                  "Version": "1"
+                },
+                "Configuration": {
+                  "ActionMode": "CREATE_UPDATE",
+                  "StackName": "MyTestStackName44",
+                  "Capabilities": "CAPABILITY_IAM",
+                  "RoleArn": "arn:aws:iam::601766089601:role/MyCloudFormationAdminRole",
+                  "TemplatePath": "SourceArtifact::cloudformation.json"
+                },
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceArtifact"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "DependsOn": "CodePipelineArtifactStoreBucket"
+    },
+    "CodePipelineArtifactStoreBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": "codepipeline-housedata-testing1"
+      }
+    },
+    "CodePipelineRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codepipeline.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        }
+      }
+    },
+    "AdminAccessPolicy": {
+      "Type": "AWS::IAM::Policy",
+      "Properties": {
+        "PolicyName": "AdminAccessPolicy",
+        "PolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": "*",
+              "Resource": "*"
+            }
+          ]
+        },
+        "Roles": [
+          { "Ref": "CodePipelineRole"}
+        ]
+      }
+    }
+  }
+}
