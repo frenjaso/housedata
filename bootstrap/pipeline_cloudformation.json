@@ -8,7 +8,7 @@
         "RoleArn": "arn:aws:iam::601766089601:role/service-role/AWSCodePipelineServiceRole-us-west-2-t3",
         "ArtifactStore": {
           "Type": "S3",
-          "Location": "codepipeline-housedata-testing1"
+          "Location": "codepipeline-housedata-testing3"
         },
         "Stages": [
           {
@@ -48,7 +48,7 @@
                 },
                 "Configuration": {
                   "ActionMode": "CREATE_UPDATE",
-                  "StackName": "MyTestStackName44",
+                  "StackName": "MyTestStackName45",
                   "Capabilities": "CAPABILITY_IAM",
                   "RoleArn": "arn:aws:iam::601766089601:role/MyCloudFormationAdminRole",
                   "TemplatePath": "SourceArtifact::cloudformation.json"
@@ -68,7 +68,7 @@
     "CodePipelineArtifactStoreBucket": {
       "Type": "AWS::S3::Bucket",
       "Properties": {
-        "BucketName": "codepipeline-housedata-testing1"
+        "BucketName": "codepipeline-housedata-testing3"
       }
     },
     "CodePipelineRole": {
