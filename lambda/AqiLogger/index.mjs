@@ -3,6 +3,7 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
 const region = "us-west-2"
 const dansPiUUID = "de39fd6b-f3de-47d7-bc68-2ef8d9047c60";
+const defaultDataType = "particulate"
 
 export const handler = async(event) => {
     console.log("Event recieved: " + JSON.stringify(event));
@@ -70,7 +71,7 @@ async function writeDataToDdb(eventBody, date) {
     console.log("Date: " + currentDate);
     console.log("Time: " + currentTime);
     
-    const item = {
+    const legacyItem = {
         TableName: "ParticulateData",
         Item: {
             // Specify the attributes of the item
@@ -80,17 +81,31 @@ async function writeDataToDdb(eventBody, date) {
             pmt25: { N: `${eventBody.pmt25}` }
         },
     };
-    
-    // Create a `PutItemCommand` with the item and execute it
+
+    const item = {
+        TableName: "SensorData",
+        Item: {
+            // Specify the attributes of the item
+            hashKey: { S: getSensorDataHashKey(eventBody, date) },
+            time: { S: currentTime },
+            pmt10: { N: `${eventBody.pmt10}` },
+            pmt25: { N: `${eventBody.pmt25}` }
+        },
+    };
+
     const command = new PutItemCommand(item);
-    
-    const response = await client.send(command)
-        .then((response) => {
-            console.log("Item put successfully:", response);
-        })
-        .catch((error) => {
-            console.error("Error putting item:", error);
-        });
+    const legacyCommand = new PutItemCommand(legacyItem);
+
+    // Create a `PutItemCommand` with the item and execute it
+    // const command = new PutItemCommand(item);
+    const commands = [ client.send(command), client.send(legacyCommand) ]
+
+    try {
+        const responses = await Promise.all(commands);
+        console.log("Items put successfully");
+    } catch (error) {
+        console.log("Error putting items: " + error);
+    }
 }
     
 function getTimeString(date) {
@@ -118,6 +133,7 @@ function getClientConfiguration() {
             region: region
         }
     } else {
+        console.log("Using hardcoded credentials");
         return {
             region: region,
             credentials: {
@@ -126,4 +142,12 @@ function getClientConfiguration() {
             }
         }
     }
+}
+
+function getSensorDataHashKey(eventBody, date) {
+    const dataType = eventBody.dataType != null ? eventBody.dataType : defaultDataType;
+    const deviceId = eventBody.deviceId != null ? eventBody.deviceId : dansPiUUID;
+    const dateString = getDateString(date);
+
+    return `${dateString}-${deviceId}-${dataType}`;
 }
