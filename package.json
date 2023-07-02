@@ -1,6 +1,9 @@
 {
   "name": "housedata",
   "version": "1.0.0",
+  "scripts": {
+    "debug": "/usr/local/bin/node ./test/testHandler.mjs"
+  },
   "devDependencies": {
     "@aws-sdk/client-cloudwatch": "^3.348.0"
   },

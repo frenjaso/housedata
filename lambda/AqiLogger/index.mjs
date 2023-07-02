@@ -1,6 +1,9 @@
 import { CloudWatchClient, PutMetricDataCommand } from "@aws-sdk/client-cloudwatch"; // ES Modules import
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 
+const region = "us-west-2"
+const dansPiUUID = "de39fd6b-f3de-47d7-bc68-2ef8d9047c60";
+
 export const handler = async(event) => {
     console.log("Event recieved: " + JSON.stringify(event));
     const eventBody = JSON.parse(event.body);
@@ -19,7 +22,7 @@ export const handler = async(event) => {
 };
 
 async function writeToCloudWatch(eventBody, date) {
-    const client = new CloudWatchClient({ region: "us-east-1" });
+    const client = new CloudWatchClient(getClientConfiguration());
     const input = {
         Namespace: "ParticulateTracker_v2",
         MetricData: [
@@ -59,7 +62,7 @@ async function writeToCloudWatch(eventBody, date) {
 
 
 async function writeDataToDdb(eventBody, date) {
-    const client = new DynamoDBClient({ "region": "us-east-1" });
+    const client = new DynamoDBClient(getClientConfiguration());
     
     const currentDate = getDateString(date);
     const currentTime = getTimeString(date);
@@ -106,4 +109,21 @@ function getDateString(date) {
 
 	let currentDate = `${currentYear}-${currentMonth}-${currentDay}`;
 	return currentDate;
+}
+
+function getClientConfiguration() {
+    const isLambda = !!process.env.LAMBDA_TASK_ROOT;
+    if (isLambda) {
+        return {
+            region: region
+        }
+    } else {
+        return {
+            region: region,
+            credentials: {
+                accessKeyId: "AKIAYYHAN2OAUCUPS65P",
+                secretAccessKey: "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"
+            }
+        }
+    }
 }
