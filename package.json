@@ -8,6 +8,7 @@
     "@aws-sdk/client-cloudwatch": "^3.348.0"
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.348.0"
+    "@aws-sdk/client-dynamodb": "^3.348.0",
+    "@frenjaso/sensor-data-common": "github:frenjaso/sensor-data-common"
   }
 }
